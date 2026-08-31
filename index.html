@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SMART MONEY FLOW TERMINAL PRO</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- TradingView Lightweight Charts -->
+  <script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════
+     TOP HEADER BAR
+═══════════════════════════════════════════════════════════ -->
+<header class="terminal-header">
+  <div class="header-left">
+    <div class="logo-block">
+      <span class="logo-icon">⬡</span>
+      <div class="logo-text">
+        <span class="logo-main">SMART MONEY FLOW</span>
+        <span class="logo-sub">TERMINAL PRO</span>
+      </div>
+    </div>
+    <div class="header-divider"></div>
+    <div class="status-block">
+      <span class="status-dot" id="statusDot"></span>
+      <span class="status-text" id="statusText">CONNECTING…</span>
+    </div>
+  </div>
+  <div class="header-center">
+    <div class="ticker-strip" id="tickerStrip">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="clock-block">
+      <span class="clock-label">UTC</span>
+      <span class="clock-time" id="clockTime">--:--:--</span>
+    </div>
+    <div class="market-regime" id="marketRegime">
+      <span class="regime-label">REGIME</span>
+      <span class="regime-value" id="regimeValue">—</span>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════════════════════════
+     ALERT TICKER
+═══════════════════════════════════════════════════════════ -->
+<div class="alert-bar">
+  <span class="alert-bar-label">⚡ ALERTS</span>
+  <div class="alert-scroller" id="alertScroller">
+    <span class="alert-item">Initializing smart money detection…</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     MAIN GRID LAYOUT
+═══════════════════════════════════════════════════════════ -->
+<main class="main-grid">
+
+  <!-- ── Row 1: Flow Chart (wide) + Sentiment + Risk Gauge ── -->
+  <section class="panel panel--chart" id="panelFlowChart">
+    <div class="panel-header">
+      <span class="panel-title">CAPITAL FLOW STREAMS</span>
+      <div class="chart-toggles" id="chartToggles">
+        <!-- Populated by JS -->
+      </div>
+      <span class="panel-badge live-badge">LIVE</span>
+    </div>
+    <div class="chart-container" id="flowChart"></div>
+  </section>
+
+  <section class="panel panel--sentiment" id="panelSentiment">
+    <div class="panel-header">
+      <span class="panel-title">MARKET SENTIMENT</span>
+    </div>
+    <div class="sentiment-meter-wrap">
+      <canvas id="sentimentArc" width="220" height="130"></canvas>
+      <div class="sentiment-readout">
+        <span class="sentiment-value" id="sentimentValue">--</span>
+        <span class="sentiment-label" id="sentimentLabel">—</span>
+      </div>
+    </div>
+    <div class="sentiment-bars" id="sentimentBars">
+      <div class="sbar-row"><span>BULLISH</span><div class="sbar-track"><div class="sbar-fill bull" id="sBull"></div></div><span id="sBullPct">--</span></div>
+      <div class="sbar-row"><span>NEUTRAL</span><div class="sbar-track"><div class="sbar-fill neut" id="sNeut"></div></div><span id="sNeutPct">--</span></div>
+      <div class="sbar-row"><span>BEARISH</span><div class="sbar-track"><div class="sbar-fill bear" id="sBear"></div></div><span id="sBearPct">--</span></div>
+    </div>
+  </section>
+
+  <section class="panel panel--risk" id="panelRisk">
+    <div class="panel-header">
+      <span class="panel-title">RISK GAUGE</span>
+    </div>
+    <div class="risk-gauge-wrap">
+      <canvas id="riskGauge" width="220" height="130"></canvas>
+      <div class="risk-readout">
+        <span class="risk-value" id="riskValue">--</span>
+        <span class="risk-label" id="riskLabel">—</span>
+      </div>
+    </div>
+    <div class="risk-indicators" id="riskIndicators">
+      <div class="ri-row"><span class="ri-name">BTC Dominance</span><span class="ri-val" id="riDomBTC">--%</span></div>
+      <div class="ri-row"><span class="ri-name">Fear Index</span><span class="ri-val" id="riFear">--</span></div>
+      <div class="ri-row"><span class="ri-name">Avg Funding</span><span class="ri-val" id="riAvgFund">--%</span></div>
+      <div class="ri-row"><span class="ri-name">Regime</span><span class="ri-val" id="riRegime">—</span></div>
+    </div>
+  </section>
+
+  <!-- ── Row 2: Asset Ranking Table + Dominance + OI Panel ── -->
+  <section class="panel panel--ranking" id="panelRanking">
+    <div class="panel-header">
+      <span class="panel-title">SMART MONEY LEADERBOARD</span>
+      <div class="tab-group">
+        <button class="tab-btn active" data-tab="inflow" onclick="switchRankTab('inflow')">INFLOWS</button>
+        <button class="tab-btn" data-tab="outflow" onclick="switchRankTab('outflow')">OUTFLOWS</button>
+      </div>
+      <span class="panel-badge">TOP 10</span>
+    </div>
+    <div class="rank-table-wrap">
+      <table class="rank-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>ASSET</th>
+            <th>FLOW SCORE</th>
+            <th>PRICE</th>
+            <th>24H CHG</th>
+            <th>VOLUME</th>
+            <th>SIGNAL</th>
+          </tr>
+        </thead>
+        <tbody id="rankTableBody">
+          <tr><td colspan="7" class="table-loading">Loading market data…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel panel--dominance" id="panelDominance">
+    <div class="panel-header">
+      <span class="panel-title">DOMINANCE</span>
+    </div>
+    <div class="dom-chart-wrap">
+      <canvas id="domChart" width="200" height="200"></canvas>
+    </div>
+    <div class="dom-legend" id="domLegend">
+      <div class="dom-row"><span class="dom-dot" style="background:#F7931A"></span><span class="dom-name">BTC</span><span class="dom-pct" id="domBTC">--%</span><span class="dom-chg" id="domBTCchg">--</span></div>
+      <div class="dom-row"><span class="dom-dot" style="background:#627EEA"></span><span class="dom-name">ETH</span><span class="dom-pct" id="domETH">--%</span><span class="dom-chg" id="domETHchg">--</span></div>
+      <div class="dom-row"><span class="dom-dot" style="background:#26A17B"></span><span class="dom-name">USDT</span><span class="dom-pct" id="domUSDT">--%</span><span class="dom-chg" id="domUSDTchg">--</span></div>
+      <div class="dom-row"><span class="dom-dot" style="background:#8B5CF6"></span><span class="dom-name">ALTS</span><span class="dom-pct" id="domALTS">--%</span><span class="dom-chg" id="domALTSchg">--</span></div>
+    </div>
+    <div class="dom-signal" id="domSignal">—</div>
+  </section>
+
+  <section class="panel panel--oi" id="panelOI">
+    <div class="panel-header">
+      <span class="panel-title">OPEN INTEREST</span>
+    </div>
+    <div class="oi-list" id="oiList">
+      <!-- Populated by JS -->
+    </div>
+  </section>
+
+  <!-- ── Row 3: Whale Alerts + Sector Heatmap + Funding ── -->
+  <section class="panel panel--whale" id="panelWhale">
+    <div class="panel-header">
+      <span class="panel-title">🐋 WHALE DETECTOR</span>
+      <span class="panel-badge pulse-badge" id="whaleBadge">0 ALERTS</span>
+    </div>
+    <div class="whale-feed" id="whaleFeed">
+      <div class="whale-empty">Scanning for whale activity…</div>
+    </div>
+  </section>
+
+  <section class="panel panel--sector" id="panelSector">
+    <div class="panel-header">
+      <span class="panel-title">SECTOR ROTATION HEATMAP</span>
+    </div>
+    <div class="sector-grid" id="sectorGrid">
+      <!-- Populated by JS -->
+    </div>
+    <div class="sector-signal" id="sectorSignal">
+      <span>HOT: <strong id="hotSector">—</strong></span>
+      <span>COLD: <strong id="coldSector">—</strong></span>
+    </div>
+  </section>
+
+  <section class="panel panel--funding" id="panelFunding">
+    <div class="panel-header">
+      <span class="panel-title">FUNDING RATES</span>
+    </div>
+    <div class="funding-list" id="fundingList">
+      <!-- Populated by JS -->
+    </div>
+    <div class="funding-summary">
+      <span>AVG: <strong id="fundAvg">--</strong></span>
+      <span>MAX: <strong id="fundMax">--</strong></span>
+      <span>MIN: <strong id="fundMin">--</strong></span>
+    </div>
+  </section>
+
+</main>
+
+<!-- ═══════════════════════════════════════════════════════════
+     BOTTOM STATUS BAR
+═══════════════════════════════════════════════════════════ -->
+<footer class="status-bar">
+  <span id="sbPairs">Pairs: 0</span>
+  <span id="sbUpdated">Last Update: —</span>
+  <span id="sbAlertCount">Alerts: 0</span>
+  <span id="sbLatency">Latency: —</span>
+  <span>Smart Money Flow Terminal Pro v1.0</span>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
